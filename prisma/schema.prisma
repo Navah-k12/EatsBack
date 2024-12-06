@@ -1,0 +1,75 @@
+
+model Task{
+  id Int @id @default(autoincrement())
+  title String
+  description String
+}
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+} 
+
+model User {
+  id                Int       @id @default(autoincrement())
+  username          String    @unique
+  email             String    @unique
+  password          String
+  phone             String    
+  registration_date DateTime @default(now())
+  Restaurant Restaurant?
+}
+
+model Mysterybox {
+  id            Int               @id @default(autoincrement())
+  name          String            
+  description   String?           @db.Text
+  price         Decimal           @db.Decimal(10,2)
+  type          Mysterybox_type
+  creation_date DateTime?         @default(now())
+  restaurantId Int
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  products Product[]
+}
+
+enum Mysterybox_type {
+  Economica
+  Especial
+  Premiun
+}
+
+
+model Product {
+  id            Int     @id @default(autoincrement())
+  name          String  
+  description   String? 
+  price         Decimal 
+  restaurant_id Int
+  status Int @default(1)
+
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+  mysteryBoxes Mysterybox[]
+
+
+}
+
+
+model Restaurant {
+  id                Int       @id @default(autoincrement())
+  name              String    
+  img               String    @db.Text
+  phone             String?   
+  email             String?   
+  registration_date DateTime? @default(now())
+  status Int @default(1)
+
+  userId Int @unique
+  user User @relation(fields: [userId], references: [id])
+  product Product []
+
+  Mysterybox Mysterybox[]
+}
